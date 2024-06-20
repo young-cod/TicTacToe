@@ -1,4 +1,5 @@
-function openPlayerConfig() {
+function openPlayerConfig(event) {
+  editedPlayer = +event.target.dataset.playerid;
   playerConfigOverlay.style.display = "block";
   backdrop.style.display = "block";
 }
@@ -8,6 +9,7 @@ function closePlayerConfig() {
   backdrop.style.display = "none";
   formElem.firstElementChild.classList.remove("error");
   errorOutput.textContent = "";
+  formElem.firstElementChild.lastElementChild.value = "";
 }
 
 function savePlayerConfig(event) {
@@ -20,4 +22,13 @@ function savePlayerConfig(event) {
     errorOutput.textContent = "Please enter a vaild name!";
     return;
   }
+
+  const updatePlayerData = document.getElementById(
+    "player-" + editedPlayer + "-data"
+  );
+  updatePlayerData.children[1].textContent = enteredPlayerName;
+
+  players[editedPlayer - 1].name = enteredPlayerName;
+
+  closePlayerConfig();
 }
