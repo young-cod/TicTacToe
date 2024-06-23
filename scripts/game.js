@@ -1,8 +1,30 @@
+function resetGameStatus() {
+  isGameOver = false;
+  activePlayer = 0;
+  currentRound = 1;
+  gameOverElem.firstElementChild.innerHTML =
+    'You won, <span id="winnder-name">PLAYER NAME</span>';
+  gameOverElem.style.display = "none";
+
+  let gameboardIdx = 0;
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      gameData[i][j] = 0;
+
+      const gameboardItem = gameBoardElem.children[gameboardIdx++];
+      gameboardItem.textContent = "";
+      gameboardItem.classList.remove("disabled");
+    }
+  }
+}
+
 function startNewGame() {
   if (players[0].name === "" || players[1].name === "0") {
     alert("Please set custom player name for both players!");
     return;
   }
+
+  resetGameStatus();
 
   activePlayerName.textContent = players[activePlayer].name;
   gameAreaElem.style.display = "block";
@@ -19,7 +41,7 @@ function switchPlayer() {
 }
 
 function selectGameField(event) {
-  if (event.target.tagName !== "LI") return;
+  if (event.target.tagName !== "LI" || isGameOver) return;
 
   const selectedField = event.target;
   const selectedColumn = selectedField.dataset.col - 1;
@@ -35,7 +57,9 @@ function selectGameField(event) {
 
   gameData[selectedRow][selectedColumn] = activePlayer + 1;
   const winnerId = checkForGameOver();
-  console.log(winnerId);
+  if (winnerId !== 0) {
+    endGame(winnerId);
+  }
 
   currentRound++;
 
@@ -47,27 +71,32 @@ function checkForGameOver() {
   for (let i = 0; i < 3; i++) {
     if (
       gameData[i][0] > 0 &&
-      gameData[i][0] === gameData[0][1] &&
-      gameData[i][1] === gameData[0][2]
+      gameData[i][0] === gameData[i][1] &&
+      gameData[i][1] === gameData[i][2]
     ) {
+      console.log(gameData);
       return gameData[i][0];
     }
-    //check column
+  }
+
+  //check column
+  for (let i = 0; i < 3; i++) {
     if (
       gameData[0][i] > 0 &&
       gameData[0][i] === gameData[1][i] &&
       gameData[0][i] === gameData[2][i]
     ) {
+      console.log(gameData);
       return gameData[0][i];
     }
   }
-
   //check diagonal
   if (
     gameData[0][0] > 0 &&
     gameData[0][0] === gameData[1][1] &&
     gameData[1][1] === gameData[2][2]
   ) {
+    console.log(gameData);
     return gameData[0][0];
   }
   if (
@@ -75,6 +104,7 @@ function checkForGameOver() {
     gameData[0][2] === gameData[1][1] &&
     gameData[1][1] === gameData[2][0]
   ) {
+    console.log(1);
     return gameData[0][2];
   }
 
@@ -83,4 +113,16 @@ function checkForGameOver() {
   }
 
   return 0;
+}
+
+function endGame(winnerId) {
+  isGameOver = true;
+  gameOverElem.style.display = "block";
+
+  if (winnerId > 0) {
+    const winnerName = players[winnerId - 1].name;
+    gameOverElem.firstElementChild.firstElementChild.textContent = winnerName;
+  } else {
+    gameOverElem.firstElementChild.textContent = "It's a draw!";
+  }
 }
